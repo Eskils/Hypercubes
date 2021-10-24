@@ -1,0 +1,22 @@
+{
+  "name": "matte",
+  "version": "1.0.0",
+  "description": "Mattebibliotek i WASM, skrive med AssemblyScript. Inkluderar Matrise, Vektor3, Vektor4, Proj",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "asbuild:untouched": "asc assembly/index.ts --target debug",
+    "asbuild:optimized": "asc assembly/index.ts --use Math=JSMath --runtime stub --disable mutable-globals --disable sign-extension --target release",
+    "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized",
+    "build": "npm run asbuild:optimized && cp ./build/optimized.wasm ../../wasmModules/matte.wasm && wasm-strip ../../wasmModules/matte.wasm && wasm-opt -Os ../../wasmModules/matte.wasm -o ../../wasmModules/matte.wasm"
+  },
+  "author": "Eskil Gjerde Sviggum",
+  "license": "ISC",
+  "dependencies": {
+    "@assemblyscript/loader": "^0.19.17",
+    "php": "^1.0.2"
+  },
+  "devDependencies": {
+    "assemblyscript": "^0.19.17"
+  }
+}

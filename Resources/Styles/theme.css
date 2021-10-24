@@ -1,0 +1,18 @@
+:root {
+    --background: #124141;
+    --secondaryBackground: rgba(255, 255, 255, 0.2);
+    --primary: #00ffff; /* Cyan */
+    --secondary: #008b8b; /* Darkcyan */
+    --label: #ffffff; /* CyWhitean */
+    --size: 100;
+    --lineWidth: 2;
+    --modelType: 0;
+    --shouldAnimate: 1;
+
+    --rXY: 0;
+    --rXZ: 0;
+    --rYZ: 0;
+    --rXW: 0;
+    --rYW: 0;
+    --rZW: 0;
+}
