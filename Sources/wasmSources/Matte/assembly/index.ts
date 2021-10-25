@@ -15,7 +15,7 @@ export class Matrise {
 
 
   radar(): Int {
-    return this.array.length / this.kolonnar; //Unsure if this would return correct value (type casting).
+    return this.array.length / this.kolonnar;
   }
 
   private rad(i: Int): Int { return i / this.kolonnar; }
@@ -29,7 +29,6 @@ export class Matrise {
 	  return (a[0] * a[3]) - (a[1] * a[2]);
   }
   
-  //Untested
   private submat(kol: Int): Array<Double> {
 	  const numRows = this.kolonnar-1;
 	  let res: Array<Double> = [];
@@ -130,8 +129,6 @@ export class Punkt {
     this.y = y;
   }
 
-  //static zero: Punkt = new Punkt(0,0);
-
   private toArray(): Array<Double> {
     return [this.x, this.y];
   }
@@ -150,14 +147,12 @@ export class Punkt {
 
   skal(lhs: Double): void {
     this.x *= lhs; this.y *= lhs;
-    //return new Punkt(lhs * this.x, lhs * this.y);
   }
 
   applyTransformation(matrix: Matrise):void {
     const res = matrix.dotProduktVec(this.toArray());
     this.x = res[0];
     this.y = res[1];
-    //return new Punkt(res[0], res[1]);
   }
 
   static identity(): Matrise {
@@ -187,8 +182,6 @@ export class Vektor3 {
     this.z = z;
   }
 
-  //static zero: Vektor3 = new Vektor3(0,0,0);
-
   private toArray(): Array<Double> {
     return [this.x, this.y, this.z];
   }
@@ -207,7 +200,6 @@ export class Vektor3 {
 
   skal(lhs: Double): void {
     this.x *= lhs; this.y *= lhs; this.z *= lhs;
-    //return new Vektor3(lhs * this.x, lhs * this.y, lhs * this.z);
   }
 
   applyTransformation(matrix: Matrise): void {
@@ -215,7 +207,6 @@ export class Vektor3 {
     this.x = res[0];
     this.y = res[1];
     this.z = res[2];
-    //return new Vektor3(res[0], res[1], res[2]);
   }
 
   static identity(): Matrise {
@@ -263,8 +254,6 @@ export class Vektor4 {
     this.w = w;
   }
 
-  //static zero:Vektor4 = new Vektor4(0,0,0,0);
-
   private toArray(): Array<Double> {
     return [this.x, this.y, this.z, this.w];
   }
@@ -283,7 +272,6 @@ export class Vektor4 {
 
   skal(lhs: Double): void {
     this.x *= lhs; this.y *= lhs; this.z *= lhs; this.w *= lhs;
-    //return new Vektor4(lhs * this.x, lhs * this.y, lhs * this.z, lhs * this.w);
   }
 
   applyTransformation(matrix: Matrise): void {
@@ -292,7 +280,6 @@ export class Vektor4 {
     this.y = res[1];
     this.z = res[2];
     this.w = res[3];
-    //return new Vektor4(res[0], res[1], res[2], res[3]);
   }
 
   static identity(): Matrise {

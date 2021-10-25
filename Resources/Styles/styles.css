@@ -18,6 +18,7 @@ canvas {
     position: absolute;
     top: 1em;
     left: 1em;
+    width: 300px;
 }
 
 .kontrollerHoster {

@@ -7,7 +7,6 @@ class Scene {
         this.onInit();
         this.sizeCanvas();
         this.animationInterval(1000/this.fps, this.update.bind(this));
-        //setInterval(this.update.bind(this), 1000/this.fps);
         window.addEventListener("resize", this.sizeCanvas.bind(this));
     }
 
