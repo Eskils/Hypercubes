@@ -225,9 +225,9 @@ export class Vektor3 {
 
   static rotateXZ(theta: Double): Matrise {
     const s = Math.sin(theta); const c = Math.cos(theta);
-    return new Matrise([c, 0, -s,
+    return new Matrise([c, 0, s,
                         0, 1, 0,
-                        s, 0, c], 3);
+                        -s, 0, c], 3);
   }
 
   static rotateXY(theta: Double): Matrise {
