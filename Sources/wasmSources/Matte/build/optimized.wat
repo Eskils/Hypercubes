@@ -1442,7 +1442,6 @@
   local.get $1
   i32.const 2
   local.get $2
-  f64.neg
   call $~lib/array/Array<f64>#__uset
   local.get $1
   i32.const 3
@@ -1459,6 +1458,7 @@
   local.get $1
   i32.const 6
   local.get $2
+  f64.neg
   call $~lib/array/Array<f64>#__uset
   local.get $1
   i32.const 7
@@ -1980,7 +1980,6 @@
   local.get $1
   i32.const 3
   local.get $2
-  f64.neg
   call $~lib/array/Array<f64>#__uset
   local.get $1
   i32.const 4
@@ -2017,6 +2016,7 @@
   local.get $1
   i32.const 12
   local.get $2
+  f64.neg
   call $~lib/array/Array<f64>#__uset
   local.get $1
   i32.const 13
@@ -2081,7 +2081,6 @@
   local.get $1
   i32.const 7
   local.get $2
-  f64.neg
   call $~lib/array/Array<f64>#__uset
   local.get $1
   i32.const 8
@@ -2106,6 +2105,7 @@
   local.get $1
   i32.const 13
   local.get $2
+  f64.neg
   call $~lib/array/Array<f64>#__uset
   local.get $1
   i32.const 14
@@ -2415,26 +2415,27 @@
  (func $assembly/index/Proj.isometrisk4D (result i32)
   (local $0 f64)
   (local $1 f64)
-  (local $2 i32)
+  (local $2 f64)
   (local $3 i32)
+  (local $4 i32)
   f64.const 1
   call $~lib/bindings/Math/atan
   f64.const 0.7071067811865475
   call $~lib/bindings/Math/atan
-  local.set $0
+  local.set $1
   f64.const 0.5773502691896258
   call $~lib/bindings/Math/atan
-  drop
-  call $assembly/index/Vektor4.rotateXW
   local.set $2
-  local.get $0
-  call $assembly/index/Vektor4.rotateYW
+  call $assembly/index/Vektor4.rotateXW
   local.set $3
-  local.get $0
-  call $assembly/index/Vektor4.rotateZW
-  local.get $3
-  call $assembly/index/Matrise#dotProduktMat
+  local.get $1
+  call $assembly/index/Vektor4.rotateYW
+  local.set $4
   local.get $2
+  call $assembly/index/Vektor4.rotateZW
+  local.get $4
+  call $assembly/index/Matrise#dotProduktMat
+  local.get $3
   call $assembly/index/Matrise#dotProduktMat
  )
  (func $assembly/index/Proj#constructor (param $0 i32) (result i32)
