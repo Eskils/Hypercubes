@@ -316,18 +316,18 @@ export class Vektor4 {
 
   static rotateXW(theta: Double): Matrise {
     const s = Math.sin(theta); const c = Math.cos(theta);
-    return new Matrise([c, 0, 0, s,
+    return new Matrise([c, 0, 0, -s,
                         0, 1, 0, 0,
                         0, 0, 1, 0,
-                        -s, 0, 0, c], 4);
+                        s, 0, 0, c], 4);
   }
 
   static rotateYW(theta: Double): Matrise {
     const s = Math.sin(theta); const c = Math.cos(theta);
     return new Matrise([1, 0, 0, 0,
-                        0, c, 0, s,
+                        0, c, 0, -s,
                         0, 0, 1, 0,
-                        0, -s, 0, c], 4);
+                        0, s, 0, c], 4);
   }
 
   static rotateZW(theta: Double): Matrise {
@@ -351,7 +351,7 @@ export class Proj {
     const trans1 = Vektor3.rotateYZ(t1);
     const trans2 = Vektor3.rotateXZ(t2);
 
-    return trans1.dotProduktMat(trans2);
+    return trans1//.dotProduktMat(trans2);
   }
 
   static isometrisk4D() : Matrise {
@@ -362,8 +362,9 @@ export class Proj {
     const trans1 = Vektor4.rotateXW(t1);
     const trans2 = Vektor4.rotateYW(t2);
     const trans3 = Vektor4.rotateZW(t3);
+    const trans4 = Vektor4.rotateYZ(t2);
 
-    return trans3.dotProduktMat(trans2).dotProduktMat(trans1);
+    return (trans1.dotProduktMat(trans2).dotProduktMat(trans3)).dotProduktMat(trans4);
   }
 
 

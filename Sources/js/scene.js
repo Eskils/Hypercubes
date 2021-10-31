@@ -152,13 +152,45 @@ class Scene {
             point.applyTransformation(rotmat);
             point.applyTransformation(this.projmat4D);
 
-            const point3D = Vektor3(point.x, point.y, point.z);
-            point3D.applyTransformation(this.projmat3D);
-            this.points.push(Punkt(point3D.x, point3D.y));
+            //const point3D = Vektor3(point.x, point.y, point.z);
+            //point3D.applyTransformation(this.projmat3D);
+            this.points.push(Punkt(point.x, point.y));
         }
     }
 
+    connectSquare(ctx, i, p1) {
+        const offset = 1, modulus = 4;
+        const coef = Math.floor(i/modulus);
+        const p2 = this.points[(coef*modulus) + ((i+offset) % modulus)];
+        addLine(ctx, p1, p2);
+    }
+
+    connectCube(ctx, i, p1) {
+        const offset = 4, modulus = 8;
+        const coef = Math.floor(i/modulus);
+        const p2 = this.points[(coef*modulus) + ((i+offset) % modulus)];
+        addLine(ctx, p1, p2);
+    }
+
+    connectTesseract(ctx, i, p1) {
+        const offset = 8, modulus = 16;
+        const coef = Math.floor(i/modulus);
+        const p2 = this.points[(coef*modulus) + ((i+offset) % modulus)];
+        addLine(ctx, p1, p2);
+    }
+
     drawLines() {
+        const ctx = this.ctx;
+        const count = this.points.length;
+        for (let i = 0; i < count; i++) {
+            const p1 = this.points[i];
+            if (count >= 4) { this.connectSquare(ctx, i, p1); }
+            if (count >= 8) { this.connectCube(ctx, i, p1); }
+            if (count >= 16) { this.connectTesseract(ctx, i, p1); }
+        }
+    }
+
+    /*drawLines() {
         const ctx = this.ctx;
         const count = this.points.length;
         for (let i = 0; i < count; i++) {
@@ -182,25 +214,25 @@ class Scene {
                 addLine(ctx, p1, p2);
             }
         }
-    }
+    }*/
 
     kvadrat() {
-        const p1 = Punkt(-1, -1);
-        const p2 = Punkt(1, -1);
-        const p3 = Punkt(1, 1);
-        const p4 = Punkt(-1, 1);
+        const p1 = Punkt(-1, -1);   // 0 0
+        const p2 = Punkt(1, -1);    // 1 0
+        const p3 = Punkt(1, 1);     // 1 1
+        const p4 = Punkt(-1, 1);    // 0 1
         this.origPoints = [p1, p2, p3, p4];
     }
 
     kube() {
-        const p1 = Vektor3(-1, -1, -1);
-        const p2 = Vektor3(1, -1, -1);
-        const p3 = Vektor3(1, 1, -1);
-        const p4 = Vektor3(-1, 1, -1);
-        const p5 = Vektor3(-1, -1, 1);
-        const p6 = Vektor3(1, -1, 1);
-        const p7 = Vektor3(1, 1, 1);
-        const p8 = Vektor3(-1, 1, 1);
+        const p1 = Vektor3(-1, -1, -1); // 0 0 0 
+        const p2 = Vektor3(1, -1, -1);  // 1 0 0
+        const p3 = Vektor3(1, 1, -1);   // 1 1 0
+        const p4 = Vektor3(-1, 1, -1);  // 0 1 0
+        const p5 = Vektor3(-1, -1, 1);  // 0 0 1
+        const p6 = Vektor3(1, -1, 1);   // 1 0 1
+        const p7 = Vektor3(1, 1, 1);    // 1 1 1
+        const p8 = Vektor3(-1, 1, 1);   // 0 1 1
         this.origPoints = [p1, p2, p3, p4, p5, p6, p7, p8];
     }
 
