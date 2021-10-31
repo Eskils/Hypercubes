@@ -351,7 +351,7 @@ export class Proj {
     const trans1 = Vektor3.rotateYZ(t1);
     const trans2 = Vektor3.rotateXZ(t2);
 
-    return trans1//.dotProduktMat(trans2);
+    return trans1.dotProduktMat(trans2);
   }
 
   static isometrisk4D() : Matrise {
