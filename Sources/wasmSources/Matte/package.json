@@ -6,7 +6,7 @@
   "scripts": {
     "test": "test",
     "asbuild:untouched": "asc assembly/index.ts --target debug",
-    "asbuild:optimized": "asc assembly/index.ts --runtime stub --disable mutable-globals --disable sign-extension --target release",
+    "asbuild:optimized": "asc assembly/index.ts --runtime stub --exportRuntime --disable mutable-globals --disable sign-extension --target release",
     "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized",
     "build": "npm run asbuild:optimized && cp ./build/optimized.wasm ../../wasmModules/matte.wasm && wasm-strip ../../wasmModules/matte.wasm && wasm-opt -Os ../../wasmModules/matte.wasm -o ../../wasmModules/matte.wasm"
   },

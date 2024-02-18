@@ -133,4 +133,14 @@ class Kontroller {
         this.handleController({target: sliderElement});
     }
 
+    setValueOfInput(name, value) {
+        const id = name.split(" ").join("_");
+        const element = document.getElementById(id);
+        if (!element) {
+            console.warn("Element #" + id + " does not exist.")
+            return
+        }
+        element.value = value;
+    }
+
 }

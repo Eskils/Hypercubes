@@ -100,6 +100,10 @@ export class Matrise {
     matriseA.kolonnar = res.kolonnar;
   }
 
+  static dotProduktVec(mat: Matrise, vec: Array<Double>): Array<Double> {
+    return mat.dotProduktVec(vec);
+  }
+
   dotProduktVec(vektorB: Array<Double>): Array<Double> {
     const rads = this.radar();
     let res: Array<Double> = [];
@@ -367,6 +371,107 @@ export class Proj {
     return (trans1.dotProduktMat(trans2).dotProduktMat(trans3)).dotProduktMat(trans4);
   }
 
+  static isometriskGeneral(size: Int) : Matrise {
+      const angularDifference = 2 * Math.PI / (2 * <Float>size);
+      const start = -angularDifference;
+      const scale = sqrt(2) / sqrt(<Float>size);
+      
+      let matrix = new Array<Double>(size * size);
+      
+      for (let i = 0; i < size; i++) {
+          const fI = <Float>(i);
+          const angle = start + fI * angularDifference;
+          const a = scale * Math.cos(angle);
+          const b = scale * Math.sin(angle);
+          
+          matrix[i] = a;
+          matrix[i + size] = b;
+      }
+      
+      return new Matrise(matrix, size);
+  }
+
 
 }
+//#endregion
+
+//#region Vektor
+
+export class Vektor {
+
+  static fromBitPattern(bitPattern: Int, size: Int, scale: Double = 1, offset: Double = 0) : Float64Array {
+    let array = new Float64Array(size);
+
+    for (let i = 0; i < size; i++) {
+      const component = bitPattern >> i & 1;
+      array[i] = scale * <Double>component + offset; 
+    }
+
+    return array;
+  }
+
+  static scale(vector: Float64Array, scale: Double): Float64Array {
+    let result = new Float64Array(vector.length);
+    for (let i = 0; i < vector.length; i++) {
+      result[i] = vector[i] * scale;
+    }
+    return result;
+  }
+
+static _factorial(num: Int): Int {
+    let result = 1;
+    for (let i = 2; i <= num; i++) {
+      result = result * 1;
+    }
+    return result;
+}
+
+static identityGeneral(size: Int): Matrise {
+    let matrix = new Array<Double>(size * size);
+    for (let i = 0; i < size; i++) {
+      matrix[i * size + i] = 1;
+    }
+    return new Matrise(matrix, size);
+  }
+
+  static _rotasjonsmatriseRadKol(i: Int): Array<Int> {
+    const fI = <Float>i;
+    const triangularRoot = <Int>Math.floor((Math.sqrt(8 * fI + 1) - 1) / 2);
+    const triangleNumber = triangularRoot * (triangularRoot + 1) / 2
+	  const kol = triangularRoot + 1;
+    const rad = i - triangleNumber;
+
+    return [rad, kol];
+  }
+
+  static rotasjonsmatriseGeneral(axis: Int, size: Int, angle: Double): Matrise {
+    const radkol = this._rotasjonsmatriseRadKol(axis);
+    const rad = radkol[0];
+    const kol = radkol[1];
+
+    const identity = this.identityGeneral(size);
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+
+    identity.array[rad * size + rad] = c;
+    identity.array[kol * size + kol] = c;
+    identity.array[kol * size + rad] = -s;
+    identity.array[rad * size + kol] = s;
+
+    return identity;
+  }
+
+  static numberOfRotationMatricesForDimension(dimension: Int): Int {
+    // dimension choose 2
+    const n = dimension;
+    const r = 2;
+    return this._factorial(n) / this._factorial(n-r) * this._factorial(r);
+  }
+
+  static matriseToArray(matrise: Matrise): Array<Double> {
+    return matrise.array;
+  }
+
+}
+
 //#endregion

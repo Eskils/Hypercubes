@@ -37,6 +37,9 @@ class Scene {
                 this.kube(); break;
             case ModelType.hyperkube:
                 this.hyperkube(); break;
+            default:
+                const size = ModelTypeDimensionSize(this.modelType);
+                this.generalNCube(size);
         }
 
         this.updateRotationControls();
@@ -73,6 +76,9 @@ class Scene {
                 this.updateKube(); break;
             case ModelType.hyperkube:
                 this.updateHyperkube(); break;
+            default:
+                this.updateGeneral(); break
+            
         }
         this.draw(this.ctx);
         this.t = (this.t + this.delta) % (2*Math.PI);
@@ -89,19 +95,71 @@ class Scene {
 
         if (Theme.shouldAnimate != this.shouldAnimate) {
             this.shouldAnimate = parseInt(Theme.shouldAnimate);
-            this.resetRotationVariables();
-            this.updateRotationControls();
             this.t = 0;
+            this.resetRotationVariables(true);
+            this.updateRotationControls();
         }
     }
 
-    resetRotationVariables() {
-        Theme.rXY = 0;
-        Theme.rXZ = 0;
-        Theme.rXW = 0;
-        Theme.rYZ = 0;
-        Theme.rYW = 0;
-        Theme.rZW = 0;
+    resetRotationVariables(animate = false) {
+        if (animate) {
+            this._animateResetRotationVariables();
+            return;
+        }
+
+        for (const plane of this.generalRotationPlanes()) {
+            const key = "r" + plane;
+            Theme[key] = 0
+        }
+    }
+
+    _animateResetRotationVariables() {
+        let planesToAnimate = [];
+        let totalFrames = 0;
+
+        for (const plane of this.generalRotationPlanes()) {
+            const key = "r" + plane;
+            const angle = +Theme[key];
+            if (angle != 0) {
+                const targetAngle = Math.ceil(angle / (Math.PI / 2)) * Math.PI / 2;
+                const frames = Math.ceil((targetAngle - angle) / this.delta);
+                if (frames > totalFrames) {
+                    totalFrames = frames;
+                }
+                planesToAnimate.push([key, angle, frames]);
+            }
+        }
+
+        if (planesToAnimate.length === 0) {
+            return
+        }
+
+        let frame = 0;
+        let finishedKeys = new Set();
+
+        this.animationInterval(1000/this.fps, () => {
+            for (const [key, angle, frames] of planesToAnimate) {
+                if (finishedKeys.has(key)) {
+                    continue;
+                }
+
+                const value = angle + this.t;
+                Theme[key] = value;
+                this.rotationControllsKontroller.setValueOfInput(key.slice(1, key.length), value);
+
+                if (frame === frames) {
+                    finishedKeys.add(key);
+                }
+            }
+            frame += 1;
+
+            if (frame == totalFrames) {
+                this.resetRotationVariables(false);
+                return false;
+            }
+
+            return true;
+        });
     }
 
     updateKvadrat() {
@@ -158,6 +216,45 @@ class Scene {
         }
     }
 
+    updateGeneral() {
+        if (this.shouldAnimate) { Theme[this.currentRotationAxis()] = this.t }
+
+        const dimensionSize = ModelTypeDimensionSize(this.modelType);
+
+        const rotationPlanes = this.generalRotationPlanes(dimensionSize);
+
+        const rotmat = Vektor.identityGeneral(dimensionSize);
+        for (const axis in rotationPlanes) {
+            const plane = rotationPlanes[axis];
+            const angle = Theme["r" + plane] || 0;
+            const mat = Vektor.rotasjonsmatriseGeneral(axis, dimensionSize, angle);
+            Matrise.dotProduktMat(rotmat, mat);
+        }
+
+        const projmat = Proj.isometriskGeneral(dimensionSize);
+
+        for (const pnt of this.origPoints) {
+            const point = Vektor.scale(pnt, this.size);
+            const rotated = Matrise.dotProduktVec(rotmat, point);
+
+            const projected = __getArray(Matrise.dotProduktVec(projmat, rotated));
+            this.points.push(Punkt(projected[0], projected[1]));
+        }
+    }
+
+    formatAsMatrix(array, size) {
+        size = size || Math.sqrt(array.length);
+        let text = "";
+        for (let i = 0; i < size; i++) {
+            for (let j = 0; j < size; j++) {
+                const index = i * size + j;
+                text += array[index] + " ";
+            }
+            text += "\n";
+        }
+        return text;
+    }
+
     connectSquare(ctx, i, p1) {
         const offset = 1, modulus = 4;
         const coef = Math.floor(i/modulus);
@@ -179,18 +276,41 @@ class Scene {
         addLine(ctx, p1, p2);
     }
 
+    connectPenteract(ctx, i, p1) {
+        const offset = 16, modulus = 32;
+        const coef = Math.floor(i/modulus);
+        const p2 = this.points[(coef*modulus) + ((i+offset) % modulus)];
+        addLine(ctx, p1, p2);
+    }
+
     drawLines() {
         const ctx = this.ctx;
         const count = this.points.length;
+
+        if (count >= 32) {
+            this.drawLinesGeneral();
+            return;
+        }
+
         for (let i = 0; i < count; i++) {
             const p1 = this.points[i];
             if (count >= 4) { this.connectSquare(ctx, i, p1); }
             if (count >= 8) { this.connectCube(ctx, i, p1); }
             if (count >= 16) { this.connectTesseract(ctx, i, p1); }
+            if (count >= 32) { this.connectPenteract(ctx, i, p1); }
         }
     }
 
-    /*drawLines() {
+    connectLinesGeneral(ctx, i, num, count) {
+        const modulo = num * 2;
+        if (i + num < count && Math.floor((i % modulo) / num) == 0) {
+            const p1 = this.points[i];
+            const p2 = this.points[i + num];
+            addLine(ctx, p1, p2);
+        }
+    }
+
+    drawLinesGeneral() {
         const ctx = this.ctx;
         const count = this.points.length;
         for (let i = 0; i < count; i++) {
@@ -199,22 +319,11 @@ class Scene {
                 const p2 = this.points[i+1];
                 addLine(ctx, p1, p2);
             }
-            if (i+2 < count && Math.floor((i % 4)/2) == 0) {
-                let p2;
-                if (i % 4 == 0) { p2 = this.points[i+3]; }
-                else { p2 = this.points[i+1]; }
-                addLine(ctx, p1, p2);
-            }
-            if (i+4 < count && Math.floor((i % 8)/4) == 0) {
-                const p2 = this.points[i+4];
-                addLine(ctx, p1, p2);
-            }
-            if (i+8 < count) {
-                const p2 = this.points[i+8];
-                addLine(ctx, p1, p2);
+            for (let j = 0; j < ModelTypeDimensionSize(this.modelType); j++) {
+                this.connectLinesGeneral(ctx, i, Math.pow(2, j), count);
             }
         }
-    }*/
+    }
 
     kvadrat() {
         const p1 = Punkt(-1, -1);   // 0 0
@@ -256,6 +365,20 @@ class Scene {
         this.origPoints = [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16];
     }
 
+    generalNCube(size) {
+        const numPoints = Math.pow(2, size); 
+
+        let points = [];
+
+        for (let i = 0; i < numPoints; i++) {
+            const pointPtr = Vektor.fromBitPattern(i, size, 2, -1);
+            const point = pointPtr;
+            points.push(point);
+        }
+
+        this.origPoints = points;
+    }
+
     currentRotationAxis() {
         if (!this.shouldAnimate) { return ""; }
         switch (this.modelType) {
@@ -265,6 +388,11 @@ class Scene {
                 return this.animAkse3D;
             case ModelType.hyperkube:
                 return this.animAkse4D;
+            default:
+                const size = ModelTypeDimensionSize(this.modelType);
+                const rotationPlanes = this.generalRotationPlanes(size);
+                const lastPlane = rotationPlanes[rotationPlanes.length - 1];
+                return "r" + lastPlane;
         }
     }
 
@@ -282,6 +410,28 @@ class Scene {
     pointRotationControlls() { return this.rotationControlls(["XY"]); }
     vektor3RotationControlls() { return this.rotationControlls(["XY", "XZ", "YZ"]); }
     vektor4RotationControlls() { return this.rotationControlls(["XY", "XZ", "YZ", "XW", "YW", "ZW"]); }
+    generalRotationControls(size) {
+        const rotationPlanes = this.generalRotationPlanes(size);
+        return this.rotationControlls(rotationPlanes);
+    }
+    generalRotationPlanes(size) {
+        size = size || ModelTypeDimensionSize(this.modelType);
+        const alphabet = "XYZWVUTSRQPONMLKJIHGFEDCBA";
+        const axes = alphabet.slice(0, Math.min(size, alphabet.length));
+        let rotationPlanes = [];
+
+        for (const i in axes) {
+            const axis = axes[i];
+            const previousAxes = i
+            for (let j = 0; j < previousAxes; j++) {
+                const previousAxis = axes[j];
+                const name = previousAxis + axis;
+                rotationPlanes.push(name);
+            }
+        }
+
+        return rotationPlanes;
+    }
 
     getRotationControlls() {
         switch (this.modelType) {
@@ -291,6 +441,8 @@ class Scene {
                 return this.vektor3RotationControlls();
             case ModelType.hyperkube:
                 return this.vektor4RotationControlls();
+            default:
+                return this.generalRotationControls(ModelTypeDimensionSize(this.modelType));
         }
     }
 
@@ -306,7 +458,9 @@ class Scene {
 
     animationInterval(ms, callback) {
         function frame() {
-            callback();
+            if (callback() === false) {
+                return;
+            }
             scheduleFrame();
         }
 

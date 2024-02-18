@@ -1,8 +1,8 @@
 :root {
-    --background: #124141;
+    --background: #11053b;
     --secondaryBackground: rgba(255, 255, 255, 0.2);
-    --primary: #00ffff; /* Cyan */
-    --secondary: #008b8b; /* Darkcyan */
+    --primary: #ff8c82; /* Cyan */
+    --secondary: #a8c6fe; /* Darkcyan */
     --label: #ffffff; /* CyWhitean */
     --size: 100;
     --lineWidth: 2;
