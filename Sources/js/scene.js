@@ -22,25 +22,18 @@ class Scene {
         this.delta = this.rpm / (this.fps * 60);
         this.t = 0;
 
+        Theme.shouldColorConnection = 1;
+
         this.animAkse2D = "rXY";
-        this.animAkse3D = "rXZ";
+        this.animAkse3D = "rYZ";
         this.animAkse4D = "rZW";
 
         this.configureVerticesFromModel();
     }
 
     configureVerticesFromModel() {
-        switch (this.modelType) {
-            case ModelType.kvadrat:
-                this.kvadrat(); break;
-            case ModelType.kube:
-                this.kube(); break;
-            case ModelType.hyperkube:
-                this.hyperkube(); break;
-            default:
-                const size = ModelTypeDimensionSize(this.modelType);
-                this.generalNCube(size);
-        }
+        const size = ModelTypeDimensionSize(this.modelType);
+        this.generalNCube(size);
 
         this.updateRotationControls();
     }
@@ -69,17 +62,7 @@ class Scene {
         this.doChecksWithVariables();
         this.size = Theme.size;
         this.points = [];
-        switch (this.modelType) {
-            case ModelType.kvadrat:
-                this.updateKvadrat(); break;
-            case ModelType.kube:
-                this.updateKube(); break;
-            case ModelType.hyperkube:
-                this.updateHyperkube(); break;
-            default:
-                this.updateGeneral(); break
-            
-        }
+        this.updateGeneral();
         this.draw(this.ctx);
         this.t = (this.t + this.delta) % (2*Math.PI);
 
@@ -217,7 +200,10 @@ class Scene {
     }
 
     updateGeneral() {
-        if (this.shouldAnimate) { Theme[this.currentRotationAxis()] = this.t }
+        if (this.shouldAnimate) { 
+            const value = Math.PI * Math.sin(((this.t % Math.PI) - Math.PI / 2)) + Math.PI;
+            Theme[this.currentRotationAxis()] = value;
+         }
 
         const dimensionSize = ModelTypeDimensionSize(this.modelType);
 
@@ -255,72 +241,32 @@ class Scene {
         return text;
     }
 
-    connectSquare(ctx, i, p1) {
-        const offset = 1, modulus = 4;
-        const coef = Math.floor(i/modulus);
-        const p2 = this.points[(coef*modulus) + ((i+offset) % modulus)];
-        addLine(ctx, p1, p2);
-    }
-
-    connectCube(ctx, i, p1) {
-        const offset = 4, modulus = 8;
-        const coef = Math.floor(i/modulus);
-        const p2 = this.points[(coef*modulus) + ((i+offset) % modulus)];
-        addLine(ctx, p1, p2);
-    }
-
-    connectTesseract(ctx, i, p1) {
-        const offset = 8, modulus = 16;
-        const coef = Math.floor(i/modulus);
-        const p2 = this.points[(coef*modulus) + ((i+offset) % modulus)];
-        addLine(ctx, p1, p2);
-    }
-
-    connectPenteract(ctx, i, p1) {
-        const offset = 16, modulus = 32;
-        const coef = Math.floor(i/modulus);
-        const p2 = this.points[(coef*modulus) + ((i+offset) % modulus)];
-        addLine(ctx, p1, p2);
+    connectLinesGeneral(ctx, i, num, count, color) {
+        const modulo = num * 2;
+        if (i + num < count && Math.floor((i % modulo) / num) == 0) {
+            const p1 = this.points[i];
+            const p2 = this.points[i + num];
+            if (color) {
+                ctx.strokeStyle = color;
+            }
+            addLine(ctx, p1, p2);
+            ctx.strokeStyle = Theme.secondary;
+        }
     }
 
     drawLines() {
         const ctx = this.ctx;
         const count = this.points.length;
-
-        if (count >= 32) {
-            this.drawLinesGeneral();
-            return;
-        }
-
-        for (let i = 0; i < count; i++) {
-            const p1 = this.points[i];
-            if (count >= 4) { this.connectSquare(ctx, i, p1); }
-            if (count >= 8) { this.connectCube(ctx, i, p1); }
-            if (count >= 16) { this.connectTesseract(ctx, i, p1); }
-            if (count >= 32) { this.connectPenteract(ctx, i, p1); }
-        }
-    }
-
-    connectLinesGeneral(ctx, i, num, count) {
-        const modulo = num * 2;
-        if (i + num < count && Math.floor((i % modulo) / num) == 0) {
-            const p1 = this.points[i];
-            const p2 = this.points[i + num];
-            addLine(ctx, p1, p2);
-        }
-    }
-
-    drawLinesGeneral() {
-        const ctx = this.ctx;
-        const count = this.points.length;
+        const numDimensions = ModelTypeDimensionSize(this.modelType);
         for (let i = 0; i < count; i++) {
             const p1 = this.points[i];
             if (i+1 < count && i % 2 == 0) {
                 const p2 = this.points[i+1];
                 addLine(ctx, p1, p2);
             }
-            for (let j = 0; j < ModelTypeDimensionSize(this.modelType); j++) {
-                this.connectLinesGeneral(ctx, i, Math.pow(2, j), count);
+            for (let j = 0; j < numDimensions; j++) {
+                const color = (j == numDimensions - 2 && Theme.shouldColorConnection == 1) ? `hsl(50 90% 80%)`: null;
+                this.connectLinesGeneral(ctx, i, Math.pow(2, j), count, color);
             }
         }
     }

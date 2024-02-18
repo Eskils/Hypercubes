@@ -37,6 +37,7 @@ canvas {
     padding: 8px;
     margin-bottom: 1em;
     margin-right: 1em;
+    width: 300px;
 }
 
 .kontrollerHoster>.kontroller {

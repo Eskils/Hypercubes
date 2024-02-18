@@ -40,6 +40,7 @@ function main() {
         InputType.Color("Line Color", Theme.secondary, "secondary"),
         InputType.Number("Line Width", new InputNumberType(0.5, 10, 2), "lineWidth"),
         InputType.Boolean("Rotate", true, "shouldAnimate"),
+        InputType.Boolean("Color connecting lower dimension", true, "shouldColorConnection"),
     ];
 
     new Kontroller("#kontroller", controllers);
